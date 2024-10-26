@@ -1,5 +1,102 @@
+# 📊 Zerodha Brokerage Calculator
 
-## Package Structure
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Python Package](https://img.shields.io/badge/python-v3.7+-blue.svg)](https://www.python.org/)
+[![PyPI version](https://badge.fury.io/py/zerodha-brokerage-calculator.svg)](https://badge.fury.io/py/zerodha-brokerage-calculator)
+
+A powerful Python package that simplifies the calculation of Zerodha brokerage charges across various trading segments including equities, commodities, and currencies. Built with precision and ease of use in mind.
+
+
+![image](https://github.com/user-attachments/assets/c14574fe-a234-423f-b553-638757ea1b3d)
+
+
+## 🌟 Features
+
+- ✨ **Comprehensive Coverage**: Support for multiple trading segments
+- 🚀 **Easy Integration**: Simple API for quick implementation
+- 💯 **Accurate Calculations**: Precise brokerage and charges computation
+- 🔄 **Real-time Updates**: Always current with latest Zerodha charges
+
+## 📦 Installation
+
+Get started with a simple pip install:
+
+```bash
+pip install zerodha-brokerage-calculator
+```
+
+## 🚀 Quick Start
+
+Here's a quick example to calculate equity intraday charges:
+
+```python
+from zerodha_brokerage_calculator import calculate_equity_intraday
+
+# Calculate charges for an intraday equity trade
+result = calculate_equity_intraday(
+    buy_price=1000,
+    sell_price=1100,
+    quantity=400,
+    exchange='NSE'
+)
+
+print(f"Net Profit: ₹{result['net_profit']:,.2f}")
+print(f"Total Charges: ₹{result['total_charges']:,.2f}")
+```
+
+## 📘 Available Functions
+
+### 📈 Equity Trading
+| Function | Description |
+|----------|-------------|
+| `calculate_equity_intraday()` | Calculate intraday trading charges |
+| `calculate_equity_delivery()` | Calculate delivery trading charges |
+| `calculate_equity_futures()` | Calculate futures trading charges |
+| `calculate_equity_options()` | Calculate options trading charges |
+
+### 💱 Currency Trading
+| Function | Description |
+|----------|-------------|
+| `calculate_currency_futures()` | Calculate currency futures charges |
+| `calculate_currency_options()` | Calculate currency options charges |
+
+### 🏭 Commodities Trading
+| Function | Description |
+|----------|-------------|
+| `calculate_commodity_futures()` | Calculate commodity futures charges |
+| `calculate_commodity_options()` | Calculate commodity options charges |
+
+## 📊 Function Parameters
+
+| Parameter | Description | Type |
+|-----------|-------------|------|
+| `buy_price` | Purchase price of the asset | float |
+| `sell_price` | Selling price of the asset | float |
+| `quantity` | Number of units traded | int |
+| `exchange` | Trading exchange (NSE/BSE/MCX) | str |
+| `multiplier` | Contract size multiplier (for commodities) | float |
+
+## 📋 Return Values
+
+Each function returns a comprehensive dictionary containing:
+
+```python
+{
+    'turnover': float,          # Total transaction value
+    'brokerage': float,         # Brokerage charges
+    'stt': float,              # Securities Transaction Tax
+    'exchange_txn_charges': float,  # Exchange transaction charges
+    'sebi_charges': float,      # SEBI charges
+    'gst': float,              # Goods and Services Tax
+    'stamp_duty': float,        # Stamp duty charges
+    'total_charges': float,     # Sum of all charges
+    'gross_profit': float,      # Profit before charges
+    'net_profit': float,        # Profit after charges
+    'points_to_breakeven': float # Required points for breakeven
+}
+```
+
+## 📁 Package Structure
 
 ```
 zerodha_brokerage_calculator/
@@ -8,99 +105,28 @@ zerodha_brokerage_calculator/
 │   └── calculator.py
 ├── README.md
 ├── setup.py
-└── LICENSE (optional)
+└── LICENSE
 ```
 
-# Zerodha Brokerage Calculator
+## 📝 License
 
-A Python package to calculate Zerodha brokerage charges for various trading segments including equities, commodities, and currencies.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Installation
+## 📫 Contact & Support
 
-You can install the package via pip:
-
-```bash
-pip install zerodha-brokerage-calculator
-```
-
-## Usage
-
-```python
-from zerodha_brokerage_calculator import calculate_equity_intraday
-
-# Example calculation for Equity Intraday
-result = calculate_equity_intraday(
-    buy_price=1000,
-    sell_price=1100,
-    quantity=400,
-    exchange='NSE'
-)
-
-print(f"Net Profit: {result['net_profit']}")
-print(f"Total Charges: {result['total_charges']}")
-```
-
-## Functions
-
-### Equity
-
-- `calculate_equity_intraday(buy_price, sell_price, quantity, exchange='NSE')`
-- `calculate_equity_delivery(buy_price, sell_price, quantity, exchange='NSE')`
-- `calculate_equity_futures(buy_price, sell_price, quantity, exchange='NSE')`
-- `calculate_equity_options(buy_price, sell_price, quantity, exchange='NSE')`
-
-### Currency
-
-- `calculate_currency_futures(buy_price, sell_price, quantity, exchange='NSE')`
-- `calculate_currency_options(buy_price, sell_price, quantity, exchange='NSE')`
-
-### Commodities
-
-- `calculate_commodity_futures(buy_price, sell_price, quantity, multiplier, exchange='MCX')`
-- `calculate_commodity_options(buy_price, sell_price, quantity, multiplier, exchange='MCX')`
-
-## Parameters
-
-- `buy_price`: The price at which you buy the asset.
-- `sell_price`: The price at which you sell the asset.
-- `quantity`: Number of units.
-- `exchange`: Exchange name ('NSE', 'BSE', 'MCX', etc.).
-- `multiplier`: Contract size multiplier (for commodities).
-
-## Returns
-
-All functions return a dictionary containing:
-
-- `turnover`
-- `brokerage`
-- `stt` or `ctt`
-- `exchange_txn_charges`
-- `sebi_charges`
-- `gst`
-- `stamp_duty`
-- `total_charges`
-- `gross_profit`
-- `net_profit`
-- `points_to_breakeven`
-
-## License
-
-This project is licensed under the MIT License.
-
-
-## 📫 How to reach me | Contact Information
 <div align="center">
-  <a href="https://hjlabs.in/"><img height="36" src="https://cdn.simpleicons.org/similarweb"/></a>
-  <a href="https://wa.me/917016525813"><img height="36" src="https://cdn.simpleicons.org/WhatsApp"/></a>
-  <a href="https://t.me/hjlabs"><img height="36" src="https://cdn.simpleicons.org/telegram"/></a>
-  <a href="mailto:hemangjoshi37a@gmail.com"><img height="36" src="https://cdn.simpleicons.org/Gmail"/></a> 
-  <a href="https://www.linkedin.com/in/hemang-joshi-046746aa"><img height="36" src="https://cdn.simpleicons.org/LinkedIn"/></a>
-  <a href="https://www.facebook.com/hemangjoshi37"><img height="36" src="https://cdn.simpleicons.org/facebook"/></a>
-  <a href="https://twitter.com/HemangJ81509525"><img height="36" src="https://cdn.simpleicons.org/Twitter"/></a>
-  <a href="https://www.tumblr.com/blog/hemangjoshi37a-blog"><img height="36" src="https://cdn.simpleicons.org/tumblr"/></a>
-  <a href="https://stackoverflow.com/users/8090050/hemang-joshi"><img height="36" src="https://cdn.simpleicons.org/StackOverflow"/></a>
-  <a href="https://www.instagram.com/hemangjoshi37"><img height="36" src="https://cdn.simpleicons.org/Instagram"/></a>
-  <a href="https://in.pinterest.com/hemangjoshi37a"><img height="36" src="https://cdn.simpleicons.org/Pinterest"/></a> 
-  <a href="http://hemangjoshi.blogspot.com"><img height="36" src="https://cdn.simpleicons.org/Blogger"/></a>
-  <a href="https://gitlab.com/hemangjoshi37a"><img height="36" src="https://cdn.simpleicons.org/gitlab"/></a>
+  
+[![Website](https://img.shields.io/badge/Website-hjlabs.in-blue?style=flat-square&logo=similarweb)](https://hjlabs.in/)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-Chat-green?style=flat-square&logo=whatsapp)](https://wa.me/917016525813)
+[![Email](https://img.shields.io/badge/Email-hemangjoshi37a@gmail.com-red?style=flat-square&logo=gmail)](mailto:hemangjoshi37a@gmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/hemang-joshi-046746aa)
+[![Twitter](https://img.shields.io/badge/Twitter-Follow-blue?style=flat-square&logo=twitter)](https://twitter.com/HemangJ81509525)
+[![Stack Overflow](https://img.shields.io/badge/Stack%20Overflow-Profile-orange?style=flat-square&logo=stackoverflow)](https://stackoverflow.com/users/8090050/hemang-joshi)
+
+</div>
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by Hemang Joshi</sub>
 </div>

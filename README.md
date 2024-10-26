@@ -87,8 +87,6 @@ All functions return a dictionary containing:
 
 This project is licensed under the MIT License.
 
-```
-
 
 ## 📫 How to reach me | Contact Information
 <div align="center">

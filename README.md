@@ -88,3 +88,21 @@ All functions return a dictionary containing:
 This project is licensed under the MIT License.
 
 ```
+
+
+## 📫 How to reach me | Contact Information
+<div align="center">
+  <a href="https://hjlabs.in/"><img height="36" src="https://cdn.simpleicons.org/similarweb"/></a>
+  <a href="https://wa.me/917016525813"><img height="36" src="https://cdn.simpleicons.org/WhatsApp"/></a>
+  <a href="https://t.me/hjlabs"><img height="36" src="https://cdn.simpleicons.org/telegram"/></a>
+  <a href="mailto:hemangjoshi37a@gmail.com"><img height="36" src="https://cdn.simpleicons.org/Gmail"/></a> 
+  <a href="https://www.linkedin.com/in/hemang-joshi-046746aa"><img height="36" src="https://cdn.simpleicons.org/LinkedIn"/></a>
+  <a href="https://www.facebook.com/hemangjoshi37"><img height="36" src="https://cdn.simpleicons.org/facebook"/></a>
+  <a href="https://twitter.com/HemangJ81509525"><img height="36" src="https://cdn.simpleicons.org/Twitter"/></a>
+  <a href="https://www.tumblr.com/blog/hemangjoshi37a-blog"><img height="36" src="https://cdn.simpleicons.org/tumblr"/></a>
+  <a href="https://stackoverflow.com/users/8090050/hemang-joshi"><img height="36" src="https://cdn.simpleicons.org/StackOverflow"/></a>
+  <a href="https://www.instagram.com/hemangjoshi37"><img height="36" src="https://cdn.simpleicons.org/Instagram"/></a>
+  <a href="https://in.pinterest.com/hemangjoshi37a"><img height="36" src="https://cdn.simpleicons.org/Pinterest"/></a> 
+  <a href="http://hemangjoshi.blogspot.com"><img height="36" src="https://cdn.simpleicons.org/Blogger"/></a>
+  <a href="https://gitlab.com/hemangjoshi37a"><img height="36" src="https://cdn.simpleicons.org/gitlab"/></a>
+</div>

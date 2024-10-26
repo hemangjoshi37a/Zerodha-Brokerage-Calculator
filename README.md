@@ -26,6 +26,10 @@ pip install zerodha_brokerage_calculator
 
 ## Usage
 
+```
+pip install zerodha-brokerage-calculator
+```
+
 ```python
 from zerodha_brokerage_calculator import calculate_equity_intraday
 

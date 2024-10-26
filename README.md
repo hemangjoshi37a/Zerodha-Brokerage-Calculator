@@ -20,7 +20,7 @@ A Python package to calculate Zerodha brokerage charges for various trading segm
 You can install the package via pip:
 
 ```bash
-pip install zerodha_brokerage_calculator
+pip install zerodha-brokerage-calculator
 ```
 
 ## Usage

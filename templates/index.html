@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zerodha Brokerage Calculator | Premium Trading Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --secondary: #8b5cf6;
+            --secondary-glow: rgba(139, 92, 246, 0.5);
+            --bg: #030712;
+            --card-bg: rgba(17, 24, 39, 0.6);
+            --text: #f9fafb;
+            --text-muted: #9ca3af;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --sidebar-bg: rgba(15, 23, 42, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background effects */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            padding: 2rem 1.5rem;
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-left, .sidebar-right {
+                display: none;
+            }
+        }
+
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+
+        .history-item {
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .history-item:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: var(--primary);
+        }
+
+        .history-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .history-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group { margin-bottom: 1rem; }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        /* Result Styles */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .profit-display {
+            text-align: center;
+            flex: 1;
+        }
+
+        .profit-val {
+            font-size: 3.5rem;
+            font-weight: 800;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-box {
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 20px;
+            padding: 1rem;
+            height: 300px;
+        }
+
+        .charges-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .charges-table td {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .charges-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .export-btns {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-outline {
+            flex: 1;
+            padding: 0.75rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .hidden { display: none; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>HJ Zerodha Pro</h1>
+        </header>
+
+        <!-- Left Sidebar: History -->
+        <aside class="sidebar sidebar-left">
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">Recent Trades</h3>
+                <div id="history_list">
+                    <!-- History items injected here -->
+                </div>
+            </div>
+            <div class="card">
+                <h3>Live Tickers</h3>
+                <div style="margin-top: 1rem; opacity: 0.6;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>NIFTY 50</span>
+                        <span style="color: var(--success)">22,475.85</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>SENSEX</span>
+                        <span style="color: var(--success)">74,119.39</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content: Inputs & High Level Results -->
+        <main class="main-content">
+            <div class="card">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Segment</label>
+                        <select id="segment">
+                            <option value="equity_intraday">Equity Intraday</option>
+                            <option value="equity_delivery">Equity Delivery</option>
+                            <option value="equity_futures">Equity Futures</option>
+                            <option value="equity_options">Equity Options</option>
+                            <option value="currency_futures">Currency Futures</option>
+                            <option value="currency_options">Currency Options</option>
+                            <option value="commodity_futures">Commodity Futures</option>
+                            <option value="commodity_options">Commodity Options</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Exchange</label>
+                        <select id="exchange">
+                            <option value="NSE">NSE</option>
+                            <option value="BSE">BSE</option>
+                            <option value="MCX">MCX</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Buy Price</label>
+                        <input type="number" id="buy_price" value="1000">
+                    </div>
+                    <div class="form-group">
+                        <label>Sell Price</label>
+                        <input type="number" id="sell_price" value="1100">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="quantity" value="100">
+                    </div>
+                    <div id="multiplier_box" class="form-group hidden">
+                        <label>Multiplier</label>
+                        <input type="number" id="multiplier" value="1">
+                    </div>
+                </div>
+                <button class="btn-primary" id="calculate_btn">ANALYZE TRADE</button>
+            </div>
+
+            <div class="card">
+                <div class="profit-display">
+                    <div class="profit-label">ESTIMATED NET PROFIT</div>
+                    <div id="net_profit" class="profit-val">₹ 0.00</div>
+                </div>
+                <div class="charts-container">
+                    <div class="chart-box">
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="compositionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: Detailed Breakdown & Export -->
+        <aside class="sidebar sidebar-right">
+            <div class="card">
+                <h3>Detailed Charges</h3>
+                <table class="charges-table">
+                    <tr><td>Brokerage</td><td id="brokerage">₹ 0.00</td></tr>
+                    <tr><td>STT / CTT</td><td id="stt">₹ 0.00</td></tr>
+                    <tr><td>Exchange Txn</td><td id="txn">₹ 0.00</td></tr>
+                    <tr><td>GST (18%)</td><td id="gst">₹ 0.00</td></tr>
+                    <tr><td>SEBI Charges</td><td id="sebi">₹ 0.00</td></tr>
+                    <tr><td>Stamp Duty</td><td id="stamp">₹ 0.00</td></tr>
+                    <tr style="color: var(--primary); font-weight: 700;">
+                        <td>TOTAL CHARGES</td><td id="total_charges">₹ 0.00</td></tr>
+                </table>
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <div class="history-title">Breakeven Points</div>
+                    <div id="breakeven" style="font-size: 1.5rem; font-weight: 700;">0.00</div>
+                </div>
+            </div>
+
+            <div class="export-btns">
+                <button class="btn-outline" onclick="exportToCSV()">EXPORT CSV</button>
+                <button class="btn-outline" onclick="window.print()">PRINT PDF</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // State
+        let profitChart = null;
+        let compositionChart = null;
+        let history = JSON.parse(localStorage.getItem('trade_history') || '[]');
+
+        // Initialize
+        updateHistoryUI();
+        initCharts();
+
+        const segmentSelect = document.getElementById('segment');
+        segmentSelect.onchange = () => {
+            document.getElementById('multiplier_box').classList.toggle('hidden', !segmentSelect.value.startsWith('commodity'));
+        };
+
+        document.getElementById('calculate_btn').onclick = async () => {
+            const data = {
+                segment: segmentSelect.value,
+                exchange: document.getElementById('exchange').value,
+                buy_price: parseFloat(document.getElementById('buy_price').value),
+                sell_price: parseFloat(document.getElementById('sell_price').value),
+                quantity: parseInt(document.getElementById('quantity').value),
+                multiplier: parseFloat(document.getElementById('multiplier').value)
+            };
+
+            const response = await fetch('/calculate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            const res = await response.json();
+            updateUI(res, data);
+            saveToHistory(res, data);
+        };
+
+        function updateUI(res, inputs) {
+            const profitEl = document.getElementById('net_profit');
+            profitEl.innerText = `₹ ${res.net_profit.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+            profitEl.style.color = res.net_profit >= 0 ? 'var(--success)' : 'var(--danger)';
+
+            document.getElementById('brokerage').innerText = `₹ ${res.brokerage.toFixed(2)}`;
+            document.getElementById('stt').innerText = `₹ ${res.stt.toFixed(2)}`;
+            document.getElementById('txn').innerText = `₹ ${res.exchange_txn_charges.toFixed(2)}`;
+            document.getElementById('gst').innerText = `₹ ${res.gst.toFixed(2)}`;
+            document.getElementById('sebi').innerText = `₹ ${res.sebi_charges.toFixed(2)}`;
+            document.getElementById('stamp').innerText = `₹ ${res.stamp_duty.toFixed(2)}`;
+            document.getElementById('total_charges').innerText = `₹ ${res.total_charges.toFixed(2)}`;
+            document.getElementById('breakeven').innerText = res.points_to_breakeven.toFixed(2);
+
+            updateCharts(res, inputs);
+        }
+
+        function initCharts() {
+            const ctx1 = document.getElementById('profitChart').getContext('2d');
+            profitChart = new Chart(ctx1, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'Expected Profit', data: [], borderColor: '#3b82f6', tension: 0.4 }] },
+                options: { maintainAspectRatio: false, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } } } }
+            });
+
+            const ctx2 = document.getElementById('compositionChart').getContext('2d');
+            compositionChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: { labels: ['Brokerage', 'Govt Taxes'], datasets: [{ data: [0, 0], backgroundColor: ['#3b82f6', '#8b5cf6'] }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function updateCharts(res, inputs) {
+            // Update Composition
+            compositionChart.data.datasets[0].data = [res.brokerage, res.total_charges - res.brokerage];
+            compositionChart.update();
+
+            // Update Profit Projection (simulated)
+            const prices = [];
+            const profits = [];
+            const step = inputs.buy_price * 0.01;
+            for(let i = -5; i <= 5; i++) {
+                let p = inputs.buy_price + (i * step);
+                prices.push(p.toFixed(0));
+                // Simplified estimate for chart
+                profits.push(((p - inputs.buy_price) * inputs.quantity) - res.total_charges);
+            }
+            profitChart.data.labels = prices;
+            profitChart.data.datasets[0].data = profits;
+            profitChart.update();
+        }
+
+        function saveToHistory(res, inputs) {
+            history.unshift({ res, inputs, time: new Date().toLocaleTimeString() });
+            if(history.length > 10) history.pop();
+            localStorage.setItem('trade_history', JSON.stringify(history));
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            const list = document.getElementById('history_list');
+            list.innerHTML = history.map((item, index) => `
+                <div class="history-item" onclick="loadHistory(${index})">
+                    <div style="display: flex; justify-content: space-between">
+                        <span class="history-title">${item.inputs.segment.replace('_', ' ')}</span>
+                        <span style="font-size: 0.7rem">${item.time}</span>
+                    </div>
+                    <div class="history-value" style="color: ${item.res.net_profit >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                        ₹ ${item.res.net_profit.toFixed(0)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadHistory(index) {
+            const item = history[index];
+            updateUI(item.res, item.inputs);
+        }
+
+        function exportToCSV() {
+            const data = history.map(h => `${h.time},${h.inputs.segment},${h.inputs.buy_price},${h.inputs.sell_price},${h.res.net_profit}`).join('\n');
+            const blob = new Blob([`Time,Segment,Buy,Sell,Net Profit\n${data}`], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'trade_history.csv';
+            a.click();
+        }
+    </script>
+</body>
+</html>

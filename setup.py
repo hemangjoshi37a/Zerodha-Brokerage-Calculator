@@ -5,7 +5,7 @@ setup(
     name='zerodha_brokerage_calculator',
     version='0.2.0',
     description='A Python package to calculate Zerodha brokerage charges for various trading segments',
-    long_description=open('README.md').read(),
+    long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     author='Hemang Joshi',
     author_email='hemangjoshi37a@gmail.com',

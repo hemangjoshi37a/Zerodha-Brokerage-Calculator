@@ -1,54 +1,39 @@
-from flask import Flask, render_template, request, jsonify
-from zerodha_brokerage_calculator import (
-    calculate_equity_intraday,
-    calculate_equity_delivery,
-    calculate_equity_futures,
-    calculate_equity_options,
-    calculate_currency_futures,
-    calculate_currency_options,
-    calculate_commodity_futures,
-    calculate_commodity_options,
-)
+from flask import Flask, send_from_directory
+from flask_cors import CORS
+import os
+from backend.core.config import Config
+from backend.models.trade import db
+from backend.api.routes import api_bp
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__, static_folder='frontend/dist')
+    app.config.from_object(Config)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+    # Initialize Extensions
+    CORS(app)
+    db.init_app(app)
 
-@app.route('/calculate', methods=['POST'])
-def calculate():
-    try:
-        data = request.json
-        segment = data.get('segment')
-        buy_price = float(data.get('buy_price', 0))
-        sell_price = float(data.get('sell_price', 0))
-        quantity = int(data.get('quantity', 0))
-        exchange = data.get('exchange', 'NSE')
-        multiplier = float(data.get('multiplier', 1))
+    # Register Blueprints
+    app.register_blueprint(api_bp, url_prefix='/api')
 
-        if segment == 'equity_intraday':
-            result = calculate_equity_intraday(buy_price, sell_price, quantity, exchange)
-        elif segment == 'equity_delivery':
-            result = calculate_equity_delivery(buy_price, sell_price, quantity, exchange)
-        elif segment == 'equity_futures':
-            result = calculate_equity_futures(buy_price, sell_price, quantity, exchange)
-        elif segment == 'equity_options':
-            result = calculate_equity_options(buy_price, sell_price, quantity, exchange)
-        elif segment == 'currency_futures':
-            result = calculate_currency_futures(buy_price, sell_price, quantity, exchange)
-        elif segment == 'currency_options':
-            result = calculate_currency_options(buy_price, sell_price, quantity, exchange)
-        elif segment == 'commodity_futures':
-            result = calculate_commodity_futures(buy_price, sell_price, quantity, multiplier, exchange)
-        elif segment == 'commodity_options':
-            result = calculate_commodity_options(buy_price, sell_price, quantity, multiplier, exchange)
+    # Create Database Tables
+    with app.app_context():
+        db.create_all()
+
+    # Serve React Frontend (Production)
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def serve(path):
+        if path != "" and os.path.exists(app.static_folder + '/' + path):
+            return send_from_directory(app.static_folder, path)
         else:
-            return jsonify({'error': 'Invalid segment'}), 400
+            # Fallback to index.html for SPA routing
+            if os.path.exists(os.path.join(app.static_folder, 'index.html')):
+                return send_from_directory(app.static_folder, 'index.html')
+            return "Backend API is running. Frontend not found.", 200
 
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
+    return app
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app = create_app()
+    app.run(host='0.0.0.0', port=5000, debug=True)

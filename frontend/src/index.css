@@ -1,0 +1,50 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-background text-white min-h-screen font-sans antialiased;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+
+.glass-panel {
+  @apply bg-card backdrop-blur-xl border border-border rounded-3xl shadow-2xl;
+}
+
+.glass-input {
+  @apply bg-black/40 border border-border rounded-xl py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all;
+}
+
+.btn-primary {
+  @apply bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none;
+}
+
+/* Hide spin buttons for number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-white/5 rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-primary/30 transition-colors;
+}

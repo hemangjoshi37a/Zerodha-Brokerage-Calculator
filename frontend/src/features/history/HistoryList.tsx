@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useHistory, useDeleteTrade } from '../../hooks/useTrade';
-import { Card, Label } from '../../components/ui/Base';
 import { History, Trash2, Clock, Calendar, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
 
 export function HistoryList({ onSelect }: { onSelect: (trade: any) => void }) {
   const { query } = useHistory();

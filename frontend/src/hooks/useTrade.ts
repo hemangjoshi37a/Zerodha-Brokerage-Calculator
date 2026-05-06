@@ -43,15 +43,25 @@ export function useDeleteTrade() {
   });
 }
 
+export interface StatsData {
+  total_trades: number;
+  today_trades: number;
+  total_net_profit: number;
+  total_charges: number;
+  segment_stats: Record<string, { count: number; profit: number }>;
+  profit_curve: { date: string; profit: number }[];
+  charge_breakdown: Record<string, number>;
+}
+
 export function useStats() {
   return {
     query: {
       queryKey: ['stats'],
-      queryFn: async () => {
-        const { data } = await api.get('/stats');
-        return data as { total_trades: number, today_trades: number };
+      queryFn: async (): Promise<StatsData> => {
+        const { data } = await api.get<StatsData>('/stats');
+        return data;
       },
       refetchInterval: 10000,
-    }
+    },
   };
 }

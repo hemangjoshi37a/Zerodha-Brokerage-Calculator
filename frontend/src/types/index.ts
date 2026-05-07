@@ -21,6 +21,9 @@ export interface Trade {
   quantity: number;
   multiplier: number;
   results: CalculationResults;
+  notes?: string;
+  tags?: string[];
+  rating?: number;
   created_at: string;
 }
 
@@ -41,4 +44,7 @@ export interface CalculationRequest {
   sell_price: number;
   quantity: number;
   multiplier?: number;
+  notes?: string;
+  tags?: string[];
+  rating?: number;
 }

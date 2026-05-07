@@ -53,12 +53,15 @@ export interface StatsData {
   charge_breakdown: Record<string, number>;
 }
 
-export function useStats() {
+export function useStats(from?: string | null, to?: string | null) {
   return {
     query: {
-      queryKey: ['stats'],
+      queryKey: ['stats', from ?? 'all', to ?? 'all'],
       queryFn: async (): Promise<StatsData> => {
-        const { data } = await api.get<StatsData>('/stats');
+        const params: Record<string, string> = {};
+        if (from) params['from'] = from;
+        if (to) params['to'] = to;
+        const { data } = await api.get<StatsData>('/stats', { params });
         return data;
       },
       refetchInterval: 10000,

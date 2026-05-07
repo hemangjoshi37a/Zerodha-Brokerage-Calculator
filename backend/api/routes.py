@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 from pydantic import BaseModel, Field, ValidationError
 from backend.services.calculator_service import CalculatorService
+from backend.services.price_service import PriceService
+from backend.services.tax_service import TaxService
+from backend.models.trade import TradeHistory
 
 api_bp = Blueprint('api', __name__)
 
@@ -11,6 +14,9 @@ class CalculationRequest(BaseModel):
     sell_price: float = Field(gt=0)
     quantity: int = Field(gt=0)
     multiplier: float = 1.0
+    notes: str = None
+    tags: list[str] = None
+    rating: int = None
 
 @api_bp.route('/calculate', methods=['POST'])
 def calculate():
@@ -41,6 +47,17 @@ def get_history():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@api_bp.route('/history/<int:trade_id>', methods=['PATCH'])
+def update_trade_journal(trade_id):
+    try:
+        data = request.get_json()
+        result = CalculatorService.update_journal(trade_id, data)
+        if result:
+            return jsonify(result), 200
+        return jsonify({"error": "Trade not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @api_bp.route('/history/<int:trade_id>', methods=['DELETE'])
 def delete_trade(trade_id):
     try:
@@ -53,8 +70,40 @@ def delete_trade(trade_id):
 @api_bp.route('/stats', methods=['GET'])
 def get_stats():
     try:
-        stats = CalculatorService.get_stats()
+        from_date = request.args.get('from')
+        to_date = request.args.get('to')
+        stats = CalculatorService.get_stats(from_date=from_date, to_date=to_date)
         return jsonify(stats), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@api_bp.route('/quote', methods=['GET'])
+def get_quote():
+    """Fetch live/delayed price for an Indian stock ticker.
+    Query params: symbol (required), exchange (optional, default NSE)
+    """
+    try:
+        symbol = request.args.get('symbol', '').strip()
+        exchange = request.args.get('exchange', 'NSE').strip()
+        if not symbol:
+            return jsonify({"error": "symbol query parameter is required"}), 400
+        data = PriceService.get_quote(symbol, exchange)
+        return jsonify(data), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": "Price feed unavailable", "details": str(e)}), 503
+
+
+@api_bp.route('/tax-estimate', methods=['GET'])
+def get_tax_estimate():
+    """Estimate tax liability across all saved trades."""
+    try:
+        trades = TradeHistory.query.order_by(TradeHistory.created_at.asc()).all()
+        trade_dicts = [t.to_dict() for t in trades]
+        result = TaxService.estimate_tax(trade_dicts)
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 @api_bp.route('/compare', methods=['POST'])

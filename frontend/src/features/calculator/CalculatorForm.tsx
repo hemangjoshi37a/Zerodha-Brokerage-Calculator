@@ -3,6 +3,7 @@ import type { CalculationRequest } from '../../types';
 import { Button, Input, Card, Label, CustomSelect } from '../../components/ui/Base';
 import { useCalculate } from '../../hooks/useTrade';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TickerSearch } from './TickerSearch';
 import {
   Layers,
   RefreshCcw,
@@ -195,6 +196,21 @@ export function CalculatorForm({ formData, onFormChange }: Props) {
               icon={Boxes}
             />
           </div>
+        </div>
+
+        {/* Live Price Lookup */}
+        <div className="space-y-2 pb-1">
+          <div className="h-px bg-white/5" />
+          <TickerSearch
+            exchange={formData.exchange}
+            onPriceSelected={(price) => {
+              const updated = { ...formData, buy_price: price };
+              onFormChange(updated);
+              setSelectedStrategy('none');
+              triggerAutoCalc(updated);
+            }}
+          />
+          <div className="h-px bg-white/5" />
         </div>
 
         {/* Buy / Sell */}

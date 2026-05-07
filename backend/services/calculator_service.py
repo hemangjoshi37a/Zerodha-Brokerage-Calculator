@@ -59,7 +59,10 @@ class CalculatorService:
             stamp_duty=res.get('stamp_duty'),
             total_charges=res.get('total_charges'),
             net_profit=res.get('net_profit'),
-            points_to_breakeven=res.get('points_to_breakeven')
+            points_to_breakeven=res.get('points_to_breakeven'),
+            notes=data.get('notes'),
+            tags=",".join(data.get('tags', [])) if data.get('tags') else None,
+            rating=data.get('rating')
         )
         
         db.session.add(trade)
@@ -159,6 +162,20 @@ class CalculatorService:
         return [t.to_dict() for t in trades]
 
     @staticmethod
+    def update_journal(trade_id, data):
+        trade = TradeHistory.query.get(trade_id)
+        if trade:
+            if 'notes' in data:
+                trade.notes = data['notes']
+            if 'tags' in data:
+                trade.tags = ",".join(data['tags']) if data['tags'] else None
+            if 'rating' in data:
+                trade.rating = data['rating']
+            db.session.commit()
+            return trade.to_dict()
+        return None
+
+    @staticmethod
     def delete_trade(trade_id):
         trade = TradeHistory.query.get(trade_id)
         if trade:
@@ -168,11 +185,32 @@ class CalculatorService:
         return False
 
     @staticmethod
-    def get_stats():
+    def get_stats(from_date: str = None, to_date: str = None):
+        from_dt = None
+        to_dt = None
+        if from_date:
+            try:
+                from_dt = datetime.strptime(from_date, '%Y-%m-%d')
+            except ValueError:
+                pass
+        if to_date:
+            try:
+                # include the full to-date day
+                to_dt = datetime.strptime(to_date, '%Y-%m-%d').replace(
+                    hour=23, minute=59, second=59
+                )
+            except ValueError:
+                pass
+
         today = date.today()
         today_start = datetime.combine(today, datetime.min.time())
-        
-        trades = TradeHistory.query.order_by(TradeHistory.created_at.asc()).all()
+
+        query = TradeHistory.query.order_by(TradeHistory.created_at.asc())
+        if from_dt:
+            query = query.filter(TradeHistory.created_at >= from_dt)
+        if to_dt:
+            query = query.filter(TradeHistory.created_at <= to_dt)
+        trades = query.all()
         
         total_trades = len(trades)
         today_trades = sum(1 for t in trades if t.created_at >= today_start)

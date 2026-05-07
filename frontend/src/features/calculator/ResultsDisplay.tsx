@@ -3,7 +3,8 @@ import type { Trade } from '../../types';
 import { Card, Label } from '../../components/ui/Base';
 import {
   TrendingUp, TrendingDown, Info, ShieldCheck, Activity,
-  Copy, Check, ReceiptIndianRupee, Percent, BarChart2
+  Copy, Check, ReceiptIndianRupee, Percent, BarChart2,
+  Compass, Calculator, ShieldAlert, Sparkles
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -19,6 +20,7 @@ import {
 } from 'chart.js';
 import { Doughnut, Line, Bar } from 'react-chartjs-2';
 import { motion, AnimatePresence } from 'framer-motion';
+import { RiskRewardVisualizer } from './RiskRewardVisualizer';
 
 ChartJS.register(
   ArcElement,
@@ -68,7 +70,7 @@ function AnimatedNumber({ value, prefix = '' }: { value: number; prefix?: string
 
 export function ResultsDisplay({ trade }: ResultsDisplayProps) {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'charges' | 'projection'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'charges' | 'projection' | 'strategy'>('overview');
 
   const handleCopy = () => {
     if (!trade) return;
@@ -234,7 +236,7 @@ export function ResultsDisplay({ trade }: ResultsDisplayProps) {
 
       {/* Tab switcher */}
       <div className="flex gap-1 bg-black/40 border border-white/5 rounded-xl p-1">
-        {(['overview', 'charges', 'projection'] as const).map(tab => (
+        {(['overview', 'charges', 'projection', 'strategy'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -336,8 +338,56 @@ export function ResultsDisplay({ trade }: ResultsDisplayProps) {
             </Card>
           </motion.div>
         )}
+
+        {activeTab === 'strategy' && (
+          <motion.div key="strategy" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="space-y-5">
+            <Card className="p-6">
+              <RiskRewardVisualizer 
+                buyPrice={trade.buy_price} 
+                sellPrice={trade.sell_price}
+              />
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <Card className="p-5 border-l-4 border-l-primary group hover:bg-primary/5 transition-all">
+                  <div className="flex items-center gap-3 mb-3">
+                     <Compass size={18} className="text-primary" />
+                     <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Trade Strategy Tips</h4>
+                  </div>
+                  <ul className="space-y-2">
+                     <StrategyItem icon={Calculator} text="Check position size vs total capital (Max 2% risk rule)" />
+                     <StrategyItem icon={ShieldAlert} text="Always maintain 1:2 Risk-Reward ratio for sustainability" />
+                     <StrategyItem icon={Sparkles} text="Review STT/GST impact on high-frequency scalping trades" />
+                  </ul>
+               </Card>
+
+               <Card className="p-5 border-l-4 border-l-emerald-500 group hover:bg-emerald-500/5 transition-all">
+                  <div className="flex items-center gap-3 mb-3">
+                     <ShieldCheck size={18} className="text-emerald-500" />
+                     <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Psychological Checklist</h4>
+                  </div>
+                  <ul className="space-y-2">
+                     <StrategyItem icon={Check} text="Am I revenge trading after a previous loss?" />
+                     <StrategyItem icon={Check} text="Is this trade based on data or FOMO?" />
+                     <StrategyItem icon={Check} text="Do I have a pre-defined exit for both profit and loss?" />
+                  </ul>
+               </Card>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function StrategyItem({ icon: Icon, text }: { icon: any; text: string }) {
+  return (
+    <li className="flex items-start gap-2 group/item">
+      <Icon size={12} className="text-muted/40 mt-0.5 group-hover/item:text-primary transition-colors" />
+      <span className="text-[10px] font-bold text-muted/70 group-hover/item:text-white/80 transition-colors leading-relaxed">
+        {text}
+      </span>
+    </li>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,6 +17,8 @@ import { TrendingUp, TrendingDown, Wallet, PieChart, Activity, Download } from '
 import { Card, Button } from '../../components/ui/Base';
 import { useStats } from '../../hooks/useTrade';
 import { useQuery } from '@tanstack/react-query';
+import { DateRangePicker, type DateRange } from '../../components/ui/DateRangePicker';
+import { TaxEstimator } from './TaxEstimator';
 
 ChartJS.register(
   CategoryScale,
@@ -32,7 +34,13 @@ ChartJS.register(
 );
 
 export function AnalyticsDashboard() {
-  const { query: statsQuery } = useStats();
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: null,
+    to: null,
+    label: 'All Time',
+  });
+
+  const { query: statsQuery } = useStats(dateRange.from, dateRange.to);
   const { data: stats, isLoading } = useQuery(statsQuery);
 
   const profitCurveData = useMemo(() => {
@@ -96,114 +104,141 @@ export function AnalyticsDashboard() {
 
   const handleExport = () => {
     const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    window.open(`${baseUrl}/export/csv`, '_blank');
+    const params = new URLSearchParams();
+    if (dateRange.from) params.set('from', dateRange.from);
+    if (dateRange.to) params.set('to', dateRange.to);
+    const qs = params.toString();
+    window.open(`${baseUrl}/export/csv${qs ? '?' + qs : ''}`, '_blank');
   };
 
-
-  if (isLoading) return <div className="text-center py-20 animate-pulse text-muted font-bold tracking-widest">LOADING QUANTUM DATA...</div>;
+  const chartOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } } },
+      x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } } }
+    },
+    plugins: { legend: { display: false } }
+  } as const;
 
   return (
     <div className="space-y-8 pb-10">
-      {/* Top Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          label="Total Net P&L" 
-          value={`₹${(stats?.total_net_profit ?? 0).toLocaleString()}`} 
-          icon={(stats?.total_net_profit ?? 0) >= 0 ? TrendingUp : TrendingDown}
-          trend={(stats?.total_net_profit ?? 0) >= 0 ? 'up' : 'down'}
-        />
-        <StatCard 
-          label="Total Charges" 
-          value={`₹${stats?.total_charges?.toLocaleString()}`} 
-          icon={Wallet}
-        />
-        <StatCard 
-          label="Efficiency" 
-          value={`${(stats?.total_net_profit ?? 0) > 0 ? (100 - ((stats?.total_charges ?? 0) / ((stats?.total_net_profit ?? 0) + (stats?.total_charges ?? 0))) * 100).toFixed(1) : 0}%`} 
-          icon={Activity}
-        />
-        <div className="flex flex-col justify-center gap-2">
-            <Button onClick={handleExport} variant="primary" className="h-full">
-                <Download size={18} />
-                EXPORT CSV
-            </Button>
+
+      {/* Date filter + Export row */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <DateRangePicker onChange={setDateRange} />
+          {dateRange.label !== 'All Time' && (
+            <span className="text-[10px] text-primary/70 font-bold uppercase tracking-widest">
+              Showing: {dateRange.label}
+            </span>
+          )}
         </div>
+        <Button onClick={handleExport} variant="primary" className="text-xs">
+          <Download size={14} />
+          EXPORT CSV
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Main Chart */}
-        <Card className="lg:col-span-8 p-8 h-[400px]">
-          <h3 className="text-sm font-black text-muted uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-            <TrendingUp size={16} className="text-primary" />
-            CUMULATIVE PROFIT CURVE
-          </h3>
-          <div className="h-[300px]">
-            {profitCurveData && (
-              <Line 
-                data={profitCurveData} 
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } } },
-                    x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } } }
-                  },
-                  plugins: { legend: { display: false } }
-                }} 
-              />
-            )}
+      {/* Top Stats */}
+      {isLoading ? (
+        <div className="text-center py-20 animate-pulse text-muted font-bold tracking-widest">
+          LOADING QUANTUM DATA…
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <StatCard
+              label="Total Net P&L"
+              value={`₹${(stats?.total_net_profit ?? 0).toLocaleString()}`}
+              icon={(stats?.total_net_profit ?? 0) >= 0 ? TrendingUp : TrendingDown}
+              trend={(stats?.total_net_profit ?? 0) >= 0 ? 'up' : 'down'}
+            />
+            <StatCard
+              label="Total Charges"
+              value={`₹${stats?.total_charges?.toLocaleString()}`}
+              icon={Wallet}
+            />
+            <StatCard
+              label="Efficiency"
+              value={`${(stats?.total_net_profit ?? 0) > 0 ? (100 - ((stats?.total_charges ?? 0) / ((stats?.total_net_profit ?? 0) + (stats?.total_charges ?? 0))) * 100).toFixed(1) : 0}%`}
+              icon={Activity}
+            />
           </div>
-        </Card>
 
-        {/* Charge Pie */}
-        <Card className="lg:col-span-4 p-8 h-[400px]">
-          <h3 className="text-sm font-black text-muted uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-            <PieChart size={16} className="text-secondary" />
-            FEE DISTRIBUTION
-          </h3>
-          <div className="h-[300px] flex items-center justify-center">
-            {chargeBreakdownData && (
-              <Pie 
-                data={chargeBreakdownData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: { 
-                    legend: { 
-                      position: 'bottom',
-                      labels: { color: 'rgba(255,255,255,0.5)', font: { size: 10 }, padding: 20 }
-                    } 
-                  }
-                }}
-              />
-            )}
-          </div>
-        </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Main Chart */}
+            <Card className="lg:col-span-8 p-8 h-[400px]">
+              <h3 className="text-sm font-black text-muted uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                <TrendingUp size={16} className="text-primary" />
+                CUMULATIVE PROFIT CURVE
+              </h3>
+              <div className="h-[300px]">
+                {profitCurveData ? (
+                  <Line data={profitCurveData} options={chartOpts} />
+                ) : (
+                  <EmptyChart />
+                )}
+              </div>
+            </Card>
 
-        {/* Segment Bar */}
-        <Card className="lg:col-span-12 p-8 h-[400px]">
-          <h3 className="text-sm font-black text-muted uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-            <Activity size={16} className="text-accent" />
-            SEGMENT-WISE PERFORMANCE
-          </h3>
-          <div className="h-[300px]">
-            {segmentPerformanceData && (
-              <Bar 
-                data={segmentPerformanceData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } } },
-                    x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } } }
-                  },
-                  plugins: { legend: { display: false } }
-                }}
-              />
-            )}
+            {/* Charge Pie */}
+            <Card className="lg:col-span-4 p-8 h-[400px]">
+              <h3 className="text-sm font-black text-muted uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                <PieChart size={16} className="text-secondary" />
+                FEE DISTRIBUTION
+              </h3>
+              <div className="h-[300px] flex items-center justify-center">
+                {chargeBreakdownData ? (
+                  <Pie
+                    data={chargeBreakdownData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'bottom',
+                          labels: { color: 'rgba(255,255,255,0.5)', font: { size: 10 }, padding: 20 }
+                        }
+                      }
+                    }}
+                  />
+                ) : (
+                  <EmptyChart />
+                )}
+              </div>
+            </Card>
+
+            {/* Segment Bar */}
+            <Card className="lg:col-span-12 p-8 h-[400px]">
+              <h3 className="text-sm font-black text-muted uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                <Activity size={16} className="text-accent" />
+                SEGMENT-WISE PERFORMANCE
+              </h3>
+              <div className="h-[300px]">
+                {segmentPerformanceData ? (
+                  <Bar data={segmentPerformanceData} options={chartOpts} />
+                ) : (
+                  <EmptyChart />
+                )}
+              </div>
+            </Card>
+
+            {/* Tax Estimator — always uses ALL trades regardless of date filter */}
+            <div className="lg:col-span-12">
+              <TaxEstimator />
+            </div>
           </div>
-        </Card>
-      </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function EmptyChart() {
+  return (
+    <div className="h-full flex items-center justify-center">
+      <p className="text-xs text-muted/30 font-bold uppercase tracking-widest">No data in range</p>
     </div>
   );
 }

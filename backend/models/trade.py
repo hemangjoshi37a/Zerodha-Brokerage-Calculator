@@ -26,6 +26,11 @@ class TradeHistory(db.Model):
     net_profit = db.Column(db.Float)
     points_to_breakeven = db.Column(db.Float)
     
+    # Journal / Notes
+    notes = db.Column(db.Text)
+    tags = db.Column(db.String(255)) # Comma separated tags
+    rating = db.Column(db.Integer) # 1-5 stars or thumb up/down
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -49,5 +54,8 @@ class TradeHistory(db.Model):
                 'net_profit': self.net_profit,
                 'points_to_breakeven': self.points_to_breakeven,
             },
+            'notes': self.notes,
+            'tags': self.tags.split(',') if self.tags else [],
+            'rating': self.rating,
             'created_at': self.created_at.isoformat()
         }

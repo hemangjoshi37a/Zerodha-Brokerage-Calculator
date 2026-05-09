@@ -19,6 +19,7 @@ import { useStats } from '../../hooks/useTrade';
 import { useQuery } from '@tanstack/react-query';
 import { DateRangePicker, type DateRange } from '../../components/ui/DateRangePicker';
 import { TaxEstimator } from './TaxEstimator';
+import { ExportReport } from '../export/ExportReport';
 
 ChartJS.register(
   CategoryScale,
@@ -139,6 +140,9 @@ export function AnalyticsDashboard() {
           EXPORT CSV
         </Button>
       </div>
+
+      {/* PDF Export Row */}
+      <ExportReport />
 
       {/* Top Stats */}
       {isLoading ? (

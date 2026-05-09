@@ -4,6 +4,10 @@ from backend.services.calculator_service import CalculatorService
 from backend.services.price_service import PriceService
 from backend.services.tax_service import TaxService
 from backend.models.trade import TradeHistory
+from backend.services.strategy_service import StrategyService
+from backend.services.import_service import ImportService
+from backend.services.insight_service import InsightService
+from backend.services.greeks_service import GreeksService
 
 api_bp = Blueprint('api', __name__)
 
@@ -214,3 +218,52 @@ def export_csv():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/strategies/payoff', methods=['POST'])
+def calculate_strategy_payoff():
+    try:
+        data = request.get_json()
+        current_price = float(data.get('current_price', 0))
+        legs = data.get('legs', [])
+        if not current_price or not legs:
+            return jsonify({"error": "current_price and legs are required"}), 400
+        result = StrategyService.calculate_payoff(current_price, legs)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/strategies/greeks', methods=['POST'])
+def calculate_strategy_greeks():
+    try:
+        data = request.get_json()
+        current_price = float(data.get('current_price', 0))
+        dte = int(data.get('dte', 30))
+        volatility = float(data.get('volatility', 20.0))
+        legs = data.get('legs', [])
+        if not current_price or not legs:
+            return jsonify({"error": "current_price and legs are required"}), 400
+        result = GreeksService.calculate_strategy_greeks(legs, current_price, dte, volatility)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/import/bulk', methods=['POST'])
+def bulk_import_trades():
+    try:
+        data = request.get_json()
+        trades = data.get('trades', [])
+        if not trades:
+            return jsonify({"error": "No trades provided"}), 400
+        result = ImportService.bulk_import(trades)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/insights', methods=['GET'])
+def get_insights():
+    try:
+        result = InsightService.generate_insights()
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+

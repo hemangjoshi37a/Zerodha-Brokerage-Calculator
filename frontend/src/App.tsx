@@ -7,11 +7,14 @@ import { AnalyticsDashboard } from './features/analytics/AnalyticsDashboard';
 import { TargetPriceEngine } from './features/calculator/TargetPriceEngine';
 import { ScenarioComparison } from './features/calculator/ScenarioComparison';
 import { PositionSizer } from './features/calculator/PositionSizer';
+import { StrategyBuilder } from './features/strategies/StrategyBuilder';
+import { TradeImport } from './features/import/TradeImport';
+import { InsightsBoard } from './features/analytics/InsightsBoard';
 import type { Trade, CalculationRequest } from './types';
 import { useCalculate, useStats } from './hooks/useTrade';
 import {
   Wallet, ShieldCheck, Activity,
-  BarChart3, LayoutGrid, Target, GitCompare, Calculator
+  BarChart3, LayoutGrid, Target, GitCompare, Calculator, TrendingUp, UploadCloud
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from './components/ui/Base';
@@ -20,7 +23,7 @@ type ViewType = 'calculator' | 'analytics' | 'tools';
 
 function App() {
   const [view, setView] = useState<ViewType>('calculator');
-  const [toolTab, setToolTab] = useState<'target' | 'compare' | 'sizer'>('target');
+  const [toolTab, setToolTab] = useState<'target' | 'compare' | 'sizer' | 'strategy' | 'import'>('target');
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
 
   // Shared form state — lifted up so tools can read it
@@ -53,6 +56,8 @@ function App() {
     { id: 'target' as const, label: 'TARGET PRICE', icon: Target },
     { id: 'compare' as const, label: 'COMPARE', icon: GitCompare },
     { id: 'sizer' as const, label: 'POSITION SIZER', icon: Calculator },
+    { id: 'strategy' as const, label: 'OPTIONS STRATEGY', icon: TrendingUp },
+    { id: 'import' as const, label: 'CSV IMPORT', icon: UploadCloud },
   ];
 
   return (
@@ -218,8 +223,11 @@ function App() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
+              className="space-y-12"
             >
               <AnalyticsDashboard />
+              <div className="w-full h-px bg-white/10" />
+              <InsightsBoard />
             </motion.div>
           )}
 
@@ -301,6 +309,18 @@ function App() {
                         <p className="font-bold text-rose-400/80">⚠ Never risk more than 2% of capital on a single trade.</p>
                       </div>
                     </div>
+                  </motion.div>
+                )}
+
+                {toolTab === 'strategy' && (
+                  <motion.div key="strategy" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }}>
+                    <StrategyBuilder />
+                  </motion.div>
+                )}
+
+                {toolTab === 'import' && (
+                  <motion.div key="import" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }}>
+                    <TradeImport />
                   </motion.div>
                 )}
               </AnimatePresence>
